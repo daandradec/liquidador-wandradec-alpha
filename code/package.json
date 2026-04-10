@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx http-server . -p 4173",
+    "dev": "npx browser-sync start --server . --files \"**/*\" --port 4173 --no-open --reload-delay 0",
+    "tun": "http-server . -p 4174 & lt --port 4174",
     "test": "node ./tests/run-tests.mjs"
   }
 }

@@ -7,7 +7,7 @@ cd code
 npm run dev
 ```
 
-App en: `http://localhost:4173`
+App en: `http://localhost:4173` con recarga automática al guardar cambios.
 
 ## Pruebas
 
