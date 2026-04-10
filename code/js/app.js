@@ -435,9 +435,80 @@ function fillNoveltyForm(novelty) {
   document.querySelector("#novelty-affects-average").checked = !!novelty.affectsSalaryAverage
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;")
+}
+
+function humanizeKey(key) {
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replaceAll("_", " ")
+    .replace(/^./, (character) => character.toUpperCase())
+}
+
+function formatResultValue(value) {
+  if (typeof value === "number") return value.toLocaleString("es-CO")
+  if (typeof value === "boolean") return value ? "Sí" : "No"
+  if (value == null || value === "") return "-"
+  return String(value)
+}
+
+function buildResultTableRows(data) {
+  return Object.entries(data)
+    .map(([key, value]) => {
+      return `<tr><th>${escapeHtml(humanizeKey(key))}</th><td>${escapeHtml(formatResultValue(value))}</td></tr>`
+    })
+    .join("")
+}
+
+function buildResultSection(title, data) {
+  return `
+    <section class="result-section">
+      <h3 class="result-section-title">${escapeHtml(title)}</h3>
+      <table class="result-table">
+        <tbody>
+          ${buildResultTableRows(data)}
+        </tbody>
+      </table>
+    </section>
+  `
+}
+
+function buildTextListSection(title, items) {
+  if (!items?.length) return ""
+
+  const listItems = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+  return `
+    <section class="result-section">
+      <h3 class="result-section-title">${escapeHtml(title)}</h3>
+      <ul class="result-list">${listItems}</ul>
+    </section>
+  `
+}
+
+function renderResultAsTable(result) {
+  const sections = [
+    buildResultSection("Bases", result.bases || {}),
+    buildResultSection("Prestaciones e indemnizaciones", result.accruals || {}),
+    buildResultSection("Seguridad social", result.socialSecurity || {}),
+    buildResultSection("Retefuente", result.tax || {}),
+    buildResultSection("Totales", result.totals || {}),
+    buildResultSection("Meta", result.meta || {}),
+    buildTextListSection("Trazabilidad", result.trace || []),
+    buildTextListSection("Advertencias", result.warnings || []),
+  ]
+
+  refs.resultOutput.innerHTML = sections.filter(Boolean).join("")
+}
+
 function renderResult(record) {
   currentResultRecord = record
-  refs.resultOutput.textContent = JSON.stringify(record.result, null, 2)
+  renderResultAsTable(record.result)
 }
 
 function runLiquidation() {

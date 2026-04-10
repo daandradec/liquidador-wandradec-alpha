@@ -269,7 +269,50 @@ th {
   padding: 0.8rem;
   max-height: 360px;
   overflow: auto;
+  font-size: 0.84rem;
+}
+
+.result-section {
+  margin-bottom: 0.9rem;
+}
+
+.result-section:last-child {
+  margin-bottom: 0;
+}
+
+.result-section-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.86rem;
+  color: #184536;
+}
+
+.result-table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+}
+
+.result-table th,
+.result-table td {
+  border-bottom: 1px solid #e3efe8;
+  padding: 0.4rem 0.45rem;
   font-size: 0.8rem;
+}
+
+.result-table th {
+  width: 55%;
+  background: #f2faf6;
+  color: #2f5b4a;
+  position: static;
+}
+
+.result-list {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.result-list li {
+  margin: 0.25rem 0;
 }
 
 .file-input {
