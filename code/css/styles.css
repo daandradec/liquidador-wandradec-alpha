@@ -176,6 +176,15 @@ button.tab-btn[aria-selected="true"] {
   border-color: transparent;
 }
 
+.grid-form input[type="checkbox"] {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin: 0;
+  justify-self: start;
+  align-self: start;
+}
+
 .span-2 {
   grid-column: span 2;
 }
