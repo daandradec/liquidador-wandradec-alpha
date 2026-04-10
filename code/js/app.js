@@ -17,6 +17,10 @@ const refs = {
   liquidationForm: document.querySelector("#liquidation-form"),
   employeeFormReset: document.querySelector("#employee-form-reset"),
   conceptFormReset: document.querySelector("#concept-form-reset"),
+  conceptsEnabledToggle: document.querySelector("#concepts-enabled-toggle"),
+  conceptsEntryContainer: document.querySelector("#concepts-entry-container"),
+  conceptsSkipContainer: document.querySelector("#concepts-skip-container"),
+  conceptsContinueBtn: document.querySelector("#concepts-continue-btn"),
   noveltyFormReset: document.querySelector("#novelty-form-reset"),
   annualYear: document.querySelector("#annual-year"),
   liquidationDate: document.querySelector("#liquidation-date"),
@@ -43,6 +47,7 @@ const TAB_ORDER = ["employee", "concepts", "novelties", "liquidation", "history"
 let state = loadState()
 let currentResultRecord = null
 let activeTab = TAB_ORDER[0]
+let pendingConceptsToggle = false
 
 function getInputValue(id) {
   return document.querySelector(`#${id}`).value
@@ -58,6 +63,10 @@ function findEmployee(employeeId) {
 
 function getSelectedEmployee() {
   return state.selectedEmployeeId ? findEmployee(state.selectedEmployeeId) : null
+}
+
+function areConceptsEnabled(employee) {
+  return Boolean(employee?.hasCommissionOrIncapacityInConcepts)
 }
 
 function makeId() {
@@ -279,6 +288,17 @@ function renderNoveltiesTable() {
     .join("")
 }
 
+function syncConceptsOptionalUI() {
+  const employee = getSelectedEmployee()
+  const enabled = employee ? areConceptsEnabled(employee) : pendingConceptsToggle
+
+  if (!refs.conceptsEnabledToggle) return
+
+  refs.conceptsEnabledToggle.checked = enabled
+  refs.conceptsEntryContainer.hidden = !employee || !enabled
+  refs.conceptsSkipContainer.hidden = !employee || enabled
+}
+
 function renderLiquidationsTable() {
   if (!state.liquidations.length) {
     refs.liquidationsTableBody.innerHTML = `<tr><td colspan="4">No hay liquidaciones guardadas.</td></tr>`
@@ -306,6 +326,7 @@ function renderLiquidationsTable() {
 function renderAll() {
   renderEmployeesTable()
   renderConceptsTable()
+  syncConceptsOptionalUI()
   renderNoveltiesTable()
   renderLiquidationsTable()
   updateHeader()
@@ -323,11 +344,13 @@ function upsertEmployee(employeeData) {
     state.employees[index] = {
       ...state.employees[index],
       ...employeeData,
+      hasCommissionOrIncapacityInConcepts: Boolean(employeeData.hasCommissionOrIncapacityInConcepts),
       updatedAt: new Date().toISOString(),
     }
   } else {
     state.employees.push({
       ...employeeData,
+      hasCommissionOrIncapacityInConcepts: Boolean(employeeData.hasCommissionOrIncapacityInConcepts),
       payConcepts: employeeData.payConcepts || [],
       novelties: employeeData.novelties || [],
       createdAt: new Date().toISOString(),
@@ -352,6 +375,8 @@ function collectEmployeeFormData() {
     transportAllowance: Number(getInputValue("employee-transport-allowance") || 0),
     riskClass: Number(getInputValue("employee-risk-class") || 1),
     includeAdditionalSalaryFactors: getInputChecked("employee-include-factors"),
+    hasCommissionOrIncapacityInConcepts:
+      existing?.hasCommissionOrIncapacityInConcepts ?? pendingConceptsToggle,
     fixedTermEndDate: getInputValue("employee-fixed-term-end-date"),
     projectDescription: getInputValue("employee-project-description").trim(),
     payConcepts: existing?.payConcepts || [],
@@ -454,12 +479,31 @@ function humanizeKey(key) {
 function formatResultValue(value) {
   if (typeof value === "number") return value.toLocaleString("es-CO")
   if (typeof value === "boolean") return value ? "Sí" : "No"
+  if (Array.isArray(value)) return value.join(", ")
   if (value == null || value === "") return "-"
   return String(value)
 }
 
+function flattenObjectEntries(data, parentKey = "") {
+  const entries = []
+
+  Object.entries(data || {}).forEach(([key, value]) => {
+    const currentKey = parentKey ? `${parentKey} / ${key}` : key
+    const isPlainObject = value && typeof value === "object" && !Array.isArray(value)
+
+    if (isPlainObject) {
+      entries.push(...flattenObjectEntries(value, currentKey))
+      return
+    }
+
+    entries.push([currentKey, value])
+  })
+
+  return entries
+}
+
 function buildResultTableRows(data) {
-  return Object.entries(data)
+  return flattenObjectEntries(data)
     .map(([key, value]) => {
       return `<tr><th>${escapeHtml(humanizeKey(key))}</th><td>${escapeHtml(formatResultValue(value))}</td></tr>`
     })
@@ -521,7 +565,7 @@ function runLiquidation() {
   const annualParameters = getAnnualParameters(Number(getInputValue("annual-year")))
   const request = {
     employee,
-    payConcepts: employee.payConcepts,
+    payConcepts: areConceptsEnabled(employee) ? employee.payConcepts : [],
     novelties: employee.novelties,
     annualParameters,
     liquidationDate: getInputValue("liquidation-date"),
@@ -687,6 +731,11 @@ function attachEvents() {
       return
     }
 
+    if (!areConceptsEnabled(employee)) {
+      showToast("Activa la opción de Comisión/Incapacidad para registrar conceptos.", true)
+      return
+    }
+
     const concept = collectConceptFormData()
     const validation = validateConcept(concept)
     if (validation.errors.length) {
@@ -706,6 +755,30 @@ function attachEvents() {
     resetConceptForm()
     setActiveTab("novelties")
     showToast("Concepto guardado.")
+  })
+
+  refs.conceptsEnabledToggle.addEventListener("change", (event) => {
+    const employee = getSelectedEmployee()
+    pendingConceptsToggle = event.target.checked
+
+    if (!employee) {
+      syncConceptsOptionalUI()
+      return
+    }
+
+    employee.hasCommissionOrIncapacityInConcepts = event.target.checked
+    if (!employee.hasCommissionOrIncapacityInConcepts) {
+      resetConceptForm()
+      document.querySelector("#concept-id").value = ""
+    }
+
+    persist()
+    renderConceptsTable()
+    syncConceptsOptionalUI()
+  })
+
+  refs.conceptsContinueBtn.addEventListener("click", () => {
+    setActiveTab("novelties")
   })
 
   refs.conceptFormReset.addEventListener("click", () => {

@@ -17,6 +17,7 @@ export function createEmptyEmployee() {
     transportAllowance: 0,
     riskClass: 1,
     includeAdditionalSalaryFactors: true,
+    hasCommissionOrIncapacityInConcepts: false,
     fixedTermEndDate: "",
     projectDescription: "",
     payConcepts: [],

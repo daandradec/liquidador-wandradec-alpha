@@ -199,77 +199,90 @@
           data-step-panel="concepts"
           hidden
         >
-          <h2>2) Conceptos de pago (salarial/no salarial)</h2>
-          <form id="concept-form" class="grid-form">
-            <input type="hidden" id="concept-id" />
-            <label>
-              Código
-              <input id="concept-code" placeholder="COMISION" required />
+          <h2>2) Conceptos de pago <span class="optional-badge">Opcional</span></h2>
+          <div class="concept-toggle">
+            <label class="concept-toggle-label" for="concepts-enabled-toggle">
+              <input id="concepts-enabled-toggle" type="checkbox" />
+              ¿Hubo Comisión o Incapacidad?
             </label>
-            <label>
-              Descripción
-              <input id="concept-description" required />
-            </label>
-            <label>
-              Monto
-              <input id="concept-amount" type="number" min="0" step="1" required />
-            </label>
-            <label>
-              Fecha de referencia
-              <input id="concept-effective-date" type="date" />
-            </label>
-            <label>
-              Es salarial
-              <input id="concept-is-salary" type="checkbox" checked />
-            </label>
-            <label>
-              Es habitual
-              <input id="concept-is-habitual" type="checkbox" checked />
-            </label>
-            <label>
-              Afecta base cesantías
-              <input id="concept-affects-severance" type="checkbox" checked />
-            </label>
-            <label>
-              Afecta base prima
-              <input id="concept-affects-bonus" type="checkbox" checked />
-            </label>
-            <label>
-              Afecta base vacaciones
-              <input id="concept-affects-vacation" type="checkbox" checked />
-            </label>
-            <label>
-              Afecta IBC
-              <input id="concept-affects-ibc" type="checkbox" checked />
-            </label>
-            <label class="span-2">
-              Fundamento de clasificación
-              <input id="concept-classification-basis" placeholder="Ej: Bonificación habitual retributiva" />
-            </label>
-            <label>
-              Usuario auditor
-              <input id="concept-changed-by" placeholder="analista.nomina" />
-            </label>
-            <div class="actions span-2">
-              <button type="submit">Guardar concepto</button>
-              <button type="button" id="concept-form-reset" class="secondary">Limpiar</button>
-            </div>
-          </form>
+          </div>
 
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Descripción</th>
-                  <th>Monto</th>
-                  <th>Clasificación</th>
-                  <th>Trazabilidad</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="concepts-table-body"></tbody>
-            </table>
+          <div id="concepts-entry-container">
+            <form id="concept-form" class="grid-form">
+              <input type="hidden" id="concept-id" />
+              <label>
+                Código
+                <input id="concept-code" placeholder="COMISION" required />
+              </label>
+              <label>
+                Descripción
+                <input id="concept-description" required />
+              </label>
+              <label>
+                Monto
+                <input id="concept-amount" type="number" min="0" step="1" required />
+              </label>
+              <label>
+                Fecha de referencia
+                <input id="concept-effective-date" type="date" />
+              </label>
+              <label>
+                Es salarial
+                <input id="concept-is-salary" type="checkbox" checked />
+              </label>
+              <label>
+                Es habitual
+                <input id="concept-is-habitual" type="checkbox" checked />
+              </label>
+              <label>
+                Afecta base cesantías
+                <input id="concept-affects-severance" type="checkbox" checked />
+              </label>
+              <label>
+                Afecta base prima
+                <input id="concept-affects-bonus" type="checkbox" checked />
+              </label>
+              <label>
+                Afecta base vacaciones
+                <input id="concept-affects-vacation" type="checkbox" checked />
+              </label>
+              <label>
+                Afecta IBC
+                <input id="concept-affects-ibc" type="checkbox" checked />
+              </label>
+              <label class="span-2">
+                Fundamento de clasificación
+                <input id="concept-classification-basis" placeholder="Ej: Bonificación habitual retributiva" />
+              </label>
+              <label>
+                Usuario auditor
+                <input id="concept-changed-by" placeholder="analista.nomina" />
+              </label>
+              <div class="actions span-2">
+                <button type="submit">Guardar concepto</button>
+                <button type="button" id="concept-form-reset" class="secondary">Limpiar</button>
+              </div>
+            </form>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Monto</th>
+                    <th>Clasificación</th>
+                    <th>Trazabilidad</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="concepts-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="concepts-skip-container" class="actions" hidden>
+            <button type="button" id="concepts-continue-btn">Continuar al siguiente paso</button>
           </div>
         </section>
 
