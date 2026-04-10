@@ -172,6 +172,7 @@ function resetEmployeeForm() {
   document.querySelector("#employee-project-description").value = empty.projectDescription
   document.querySelector("#employee-variable-salary").checked = empty.variableSalary
   document.querySelector("#employee-include-factors").checked = empty.includeAdditionalSalaryFactors
+  document.querySelector("#employee-apply-indemnizacion").checked = empty.applyIndemnizacion
 }
 
 function resetConceptForm() {
@@ -345,12 +346,14 @@ function upsertEmployee(employeeData) {
     state.employees[index] = {
       ...state.employees[index],
       ...employeeData,
+      applyIndemnizacion: Boolean(employeeData.applyIndemnizacion),
       hasCommissionOrIncapacityInConcepts: Boolean(employeeData.hasCommissionOrIncapacityInConcepts),
       updatedAt: new Date().toISOString(),
     }
   } else {
     state.employees.push({
       ...employeeData,
+      applyIndemnizacion: Boolean(employeeData.applyIndemnizacion),
       hasCommissionOrIncapacityInConcepts: Boolean(employeeData.hasCommissionOrIncapacityInConcepts),
       payConcepts: employeeData.payConcepts || [],
       novelties: employeeData.novelties || [],
@@ -376,6 +379,7 @@ function collectEmployeeFormData() {
     transportAllowance: Number(getInputValue("employee-transport-allowance") || 0),
     riskClass: Number(getInputValue("employee-risk-class") || 1),
     includeAdditionalSalaryFactors: getInputChecked("employee-include-factors"),
+    applyIndemnizacion: getInputChecked("employee-apply-indemnizacion"),
     hasCommissionOrIncapacityInConcepts:
       existing?.hasCommissionOrIncapacityInConcepts ?? pendingConceptsToggle,
     fixedTermEndDate: getInputValue("employee-fixed-term-end-date"),
@@ -432,6 +436,7 @@ function fillEmployeeForm(employee) {
   document.querySelector("#employee-project-description").value = employee.projectDescription || ""
   document.querySelector("#employee-variable-salary").checked = !!employee.variableSalary
   document.querySelector("#employee-include-factors").checked = !!employee.includeAdditionalSalaryFactors
+  document.querySelector("#employee-apply-indemnizacion").checked = !!employee.applyIndemnizacion
 }
 
 function fillConceptForm(concept) {

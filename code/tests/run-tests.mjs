@@ -18,6 +18,7 @@ function createBaseEmployee(overrides = {}) {
     transportAllowance: 0,
     riskClass: 1,
     includeAdditionalSalaryFactors: true,
+    applyIndemnizacion: true,
     fixedTermEndDate: "",
     projectDescription: "",
     ...overrides,
@@ -206,6 +207,30 @@ run("Caso 6: indemnización indefinido >= 10 SMLMV", () => {
   assert.equal(result.ok, true)
   assert.equal(result.meta.daysWorked, 1080)
   assert.equal(result.accruals.indemnizacionDespido, 30000000)
+})
+
+run("Caso 7: indemnización desactivada", () => {
+  const result = liquidateEmployee({
+    employee: createBaseEmployee({
+      startDate: "2025-01-01",
+      endDate: "2025-01-31",
+      baseMonthlySalary: 3000000,
+      applyIndemnizacion: false,
+    }),
+    payConcepts: [],
+    novelties: [],
+    annualParameters: params,
+    liquidationDate: "2025-03-31",
+    calculateSocialSecurity: false,
+    calculateWithholdingTax: false,
+    litigationMode: true,
+    withholdingProcedure: 1,
+  })
+
+  assert.equal(result.ok, true)
+  assert.equal(result.accruals.indemnizacionDespido, 0)
+  assert.equal(result.accruals.indemnizacionMoratoria, 0)
+  assert.equal(result.accruals.sancionCesantiasFondo, 0)
 })
 
 if (process.exitCode) {

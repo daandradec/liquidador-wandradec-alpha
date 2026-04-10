@@ -88,29 +88,37 @@ export function calculateLaborAccruals({ employee, bases, liquidationDate, litig
 
   const vacaciones = roundCOP(bases.vacationBase * (daysWorked / VACATION_FACTOR_DAYS))
 
-  const indemnizacionDespido = calculateDismissalCompensation({
-    employee,
-    baseMonthlySalary: bases.dismissalCompensationBase,
-    annualParameters,
-    daysWorked,
-  })
+  let indemnizacionDespido = 0
+  let indemnizacionMoratoria = 0
+  let sancionCesantiasFondo = 0
 
-  const indemnizacionMoratoria = calculateMoratoryCompensation({
-    employee,
-    baseMonthlySalary: bases.dismissalCompensationBase,
-    liquidationDate,
-    litigationMode,
-    trace,
-  })
+  if (employee.applyIndemnizacion) {
+    indemnizacionDespido = calculateDismissalCompensation({
+      employee,
+      baseMonthlySalary: bases.dismissalCompensationBase,
+      annualParameters,
+      daysWorked,
+    })
 
-  const sancionCesantiasFondo = calculateLateSeveranceFundPenalty({
-    employee,
-    baseMonthlySalary: bases.severanceBase,
-    liquidationDate,
-  })
+    indemnizacionMoratoria = calculateMoratoryCompensation({
+      employee,
+      baseMonthlySalary: bases.dismissalCompensationBase,
+      liquidationDate,
+      litigationMode,
+      trace,
+    })
 
-  if (!employee.endDate) {
-    trace.push("No hay fecha de retiro: la indemnización por despido queda en 0 hasta que exista terminación.")
+    sancionCesantiasFondo = calculateLateSeveranceFundPenalty({
+      employee,
+      baseMonthlySalary: bases.severanceBase,
+      liquidationDate,
+    })
+
+    if (!employee.endDate) {
+      trace.push("No hay fecha de retiro: la indemnización por despido queda en 0 hasta que exista terminación.")
+    }
+  } else {
+    trace.push("Indemnización desactivada en la configuración del empleado.")
   }
 
   return {

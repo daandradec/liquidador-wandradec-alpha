@@ -19,7 +19,7 @@
     <main class="app-shell">
       <header class="hero">
         <div>
-          <p class="eyebrow">Motor jurídico-operativo v1</p>
+          <p class="eyebrow">Motor jurídico</p>
           <h1>Liquidador Laboral Colombia</h1>
           <p class="subtitle">
             Software liquidador laboral diseñado para profesionales de nómina, recursos humanos y abogados laboralistas en Colombia. Permite calcular liquidaciones de nómina, prestaciones sociales, e indemnizaciones. Herramienta de propiedad de <strong id="author-title">Williams Alexander Andrade Cuenca</strong>
@@ -100,6 +100,20 @@
 
         <section id="panel-employee" class="tab-panel" role="tabpanel" aria-labelledby="tab-employee" data-step-panel="employee">
           <h2>1) Empleado</h2>
+          <details class="tutorial-accordion">
+            <summary class="tutorial-accordion__summary">Tutorial del paso 1: Empleado</summary>
+            <div class="tutorial-accordion__content">
+              <ol>
+                <li>Ingresa identificación y nombre exactamente como aparecerán en reportes y exportaciones.</li>
+                <li>Define fecha de inicio y, solo si aplica, fecha de retiro para cálculos de finalización.</li>
+                <li>Selecciona tipo de contrato correcto (indefinido, fijo, obra/labor u ocasional) porque afecta indemnizaciones y validaciones.</li>
+                <li>Configura modo salarial, salario base, auxilio y clase ARL; estos valores alimentan bases de liquidación y seguridad social.</li>
+                <li>Si el contrato es fijo u obra/labor, completa fecha final contractual o descripción según corresponda.</li>
+                <li>Marca las casillas de salario variable, factores adicionales e indemnización según la realidad del empleado.</li>
+                <li>Guarda el empleado y usa la tabla inferior para seleccionarlo o editarlo antes de continuar.</li>
+              </ol>
+            </div>
+          </details>
           <form id="employee-form" class="grid-form">
             <input type="hidden" id="employee-id" />
 
@@ -169,6 +183,10 @@
               Incluir otros factores salariales
               <input id="employee-include-factors" type="checkbox" checked />
             </label>
+            <label>
+              ¿Hay indemnización?
+              <input id="employee-apply-indemnizacion" type="checkbox" />
+            </label>
 
             <div class="actions span-2">
               <button type="submit">Guardar empleado</button>
@@ -201,6 +219,19 @@
           hidden
         >
           <h2>2) Conceptos de pago <span class="optional-badge">Opcional</span></h2>
+          <details class="tutorial-accordion">
+            <summary class="tutorial-accordion__summary">Tutorial del paso 2: Conceptos</summary>
+            <div class="tutorial-accordion__content">
+              <ol>
+                <li>Activa “¿Hubo Comisión o Incapacidad?” solo si necesitas registrar conceptos para el cálculo.</li>
+                <li>Crea cada concepto con código y descripción claros para facilitar trazabilidad posterior.</li>
+                <li>Define monto y fecha de referencia para soportar promedios y análisis del periodo liquidado.</li>
+                <li>Marca si el concepto es salarial/habitual y qué bases afecta (cesantías, prima, vacaciones, IBC).</li>
+                <li>Completa fundamento de clasificación y usuario auditor cuando quieras respaldo técnico/jurídico.</li>
+                <li>Guarda conceptos y revisa la tabla para editar o eliminar antes de pasar al siguiente tab.</li>
+              </ol>
+            </div>
+          </details>
           <div class="concept-toggle">
             <label class="concept-toggle-label" for="concepts-enabled-toggle">
               <input id="concepts-enabled-toggle" type="checkbox" />
@@ -296,6 +327,19 @@
           hidden
         >
           <h2>3) Novedades de nómina</h2>
+          <details class="tutorial-accordion">
+            <summary class="tutorial-accordion__summary">Tutorial del paso 3: Novedades</summary>
+            <div class="tutorial-accordion__content">
+              <ol>
+                <li>Registra novedades con código y descripción estandarizados para mantener consistencia operativa.</li>
+                <li>Ingresa monto y rango de fechas válidos; la fecha final no debe ser menor que la inicial.</li>
+                <li>Usa “Afecta IBC” para controlar impacto en aportes de seguridad social.</li>
+                <li>Usa “Afecta promedios salariales” para determinar si influye en bases promedio.</li>
+                <li>Guarda cada novedad y valida en la tabla su impacto antes de ejecutar la liquidación.</li>
+                <li>Corrige o elimina novedades desde acciones de la tabla para evitar arrastres incorrectos.</li>
+              </ol>
+            </div>
+          </details>
           <form id="novelty-form" class="grid-form">
             <input type="hidden" id="novelty-id" />
             <label>
@@ -357,6 +401,20 @@
           hidden
         >
           <h2>4) Ejecutar liquidación</h2>
+          <details class="tutorial-accordion">
+            <summary class="tutorial-accordion__summary">Tutorial del paso 4: Ejecutar</summary>
+            <div class="tutorial-accordion__content">
+              <ol>
+                <li>Confirma que el empleado correcto esté seleccionado en el encabezado antes de liquidar.</li>
+                <li>Elige fecha de liquidación y vigencia anual para tomar parámetros legales correctos.</li>
+                <li>Activa seguridad social y retefuente solo cuando necesites incluir esos módulos en el cálculo.</li>
+                <li>Selecciona procedimiento de retefuente (1 o 2) según el caso de nómina.</li>
+                <li>Activa modo litigio únicamente si deseas estimar componente moratorio.</li>
+                <li>Ejecuta la liquidación y revisa el resultado por secciones: bases, prestaciones, deducciones y totales.</li>
+                <li>Exporta el resultado vigente en CSV, Excel o PDF según el canal de entrega requerido.</li>
+              </ol>
+            </div>
+          </details>
           <form id="liquidation-form" class="grid-form">
             <label>
               Fecha liquidación
@@ -408,6 +466,19 @@
           hidden
         >
           <h2>5) Historial y respaldo</h2>
+          <details class="tutorial-accordion">
+            <summary class="tutorial-accordion__summary">Tutorial del paso 5: Historial</summary>
+            <div class="tutorial-accordion__content">
+              <ol>
+                <li>Consulta cada registro por fecha, empleado y neto para validar ejecuciones previas.</li>
+                <li>Usa “Ver” para cargar una liquidación histórica en pantalla sin recalcular.</li>
+                <li>Usa “Eliminar” con cuidado: quita el registro del historial actual.</li>
+                <li>Exporta respaldo JSON antes de cambios masivos o depuración de registros.</li>
+                <li>Importa respaldo JSON para restaurar información en el estado local de la aplicación.</li>
+                <li>Después de importar, valida un registro en pantalla y una exportación para confirmar integridad.</li>
+              </ol>
+            </div>
+          </details>
           <div class="table-wrap">
             <table>
               <thead>

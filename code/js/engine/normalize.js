@@ -57,6 +57,7 @@ export function normalizeRequest(rawRequest) {
     transportAllowance: toNumber(rawRequest.employee.transportAllowance),
     riskClass: Number(rawRequest.employee.riskClass || 1),
     includeAdditionalSalaryFactors: isTruthy(rawRequest.employee.includeAdditionalSalaryFactors),
+    applyIndemnizacion: isTruthy(rawRequest.employee.applyIndemnizacion),
     fixedTermEndDate: formatDate(rawRequest.employee.fixedTermEndDate),
     projectDescription: `${rawRequest.employee.projectDescription || ""}`.trim(),
   }

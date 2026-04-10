@@ -1,0 +1,22 @@
+{
+  "name": "04.-liquidadorwaandr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx http-server ./code/ -p 8080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daandradec/liquidador-wandradec-alpha.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/daandradec/liquidador-wandradec-alpha/issues"
+  },
+  "homepage": "https://github.com/daandradec/liquidador-wandradec-alpha#readme"
+}
