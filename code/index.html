@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liquidador Laboral Colombia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Motor jurídico-operativo v1</p>
+          <h1>Liquidador Laboral Colombia</h1>
+          <p class="subtitle">
+            SPA en JavaScript puro con trazabilidad de bases, seguridad social, indemnizaciones y exportación.
+          </p>
+        </div>
+        <div class="hero-meta">
+          <p><span>Empleado activo:</span> <strong id="selected-employee-label">Ninguno</strong></p>
+          <p><span>Registros:</span> <strong id="employees-count">0</strong></p>
+          <p><span>Liquidaciones:</span> <strong id="liquidations-count">0</strong></p>
+        </div>
+      </header>
+
+      <section class="panel workflow-panel">
+        <div class="tabs-header">
+          <h2>Flujo de liquidación</h2>
+          <div class="tabs-nav" role="tablist" aria-label="Pasos de liquidación">
+            <button
+              id="tab-employee"
+              class="tab-btn"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="panel-employee"
+              data-step="employee"
+            >
+              1. Empleado
+            </button>
+            <button
+              id="tab-concepts"
+              class="tab-btn"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-concepts"
+              tabindex="-1"
+              data-step="concepts"
+            >
+              2. Conceptos
+            </button>
+            <button
+              id="tab-novelties"
+              class="tab-btn"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-novelties"
+              tabindex="-1"
+              data-step="novelties"
+            >
+              3. Novedades
+            </button>
+            <button
+              id="tab-liquidation"
+              class="tab-btn"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-liquidation"
+              tabindex="-1"
+              data-step="liquidation"
+            >
+              4. Ejecutar
+            </button>
+            <button
+              id="tab-history"
+              class="tab-btn"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-history"
+              tabindex="-1"
+              data-step="history"
+            >
+              5. Historial
+            </button>
+          </div>
+        </div>
+
+        <section id="panel-employee" class="tab-panel" role="tabpanel" aria-labelledby="tab-employee" data-step-panel="employee">
+          <h2>1) Empleado</h2>
+          <form id="employee-form" class="grid-form">
+            <input type="hidden" id="employee-id" />
+
+            <label>
+              Identificación
+              <input id="employee-identification" required />
+            </label>
+            <label>
+              Nombre
+              <input id="employee-name" required />
+            </label>
+            <label>
+              Fecha inicio
+              <input id="employee-start-date" type="date" required />
+            </label>
+            <label>
+              Fecha fin (retiro)
+              <input id="employee-end-date" type="date" />
+            </label>
+            <label>
+              Tipo de contrato
+              <select id="employee-contract-type">
+                <option value="INDEFINITE">Indefinido</option>
+                <option value="FIXED_TERM">Término fijo</option>
+                <option value="PROJECT">Obra o labor</option>
+                <option value="OCCASIONAL">Ocasional</option>
+              </select>
+            </label>
+            <label>
+              Modo salarial
+              <select id="employee-salary-mode">
+                <option value="ORDINARY">Ordinario</option>
+                <option value="INTEGRAL">Integral</option>
+              </select>
+            </label>
+            <label>
+              Salario mensual base
+              <input id="employee-base-salary" type="number" min="0" step="1" required />
+            </label>
+            <label>
+              Auxilio transporte
+              <input id="employee-transport-allowance" type="number" min="0" step="1" value="0" />
+            </label>
+            <label>
+              Clase ARL
+              <select id="employee-risk-class">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </label>
+            <label>
+              Fecha fin contrato fijo
+              <input id="employee-fixed-term-end-date" type="date" />
+            </label>
+            <label class="span-2">
+              Descripción obra/labor
+              <input id="employee-project-description" placeholder="Obligatorio para contrato de obra/labor" />
+            </label>
+            <label>
+              Salario variable
+              <input id="employee-variable-salary" type="checkbox" />
+            </label>
+            <label>
+              Incluir otros factores salariales
+              <input id="employee-include-factors" type="checkbox" checked />
+            </label>
+
+            <div class="actions span-2">
+              <button type="submit">Guardar empleado</button>
+              <button type="button" id="employee-form-reset" class="secondary">Limpiar</button>
+            </div>
+          </form>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Identificación</th>
+                  <th>Nombre</th>
+                  <th>Contrato</th>
+                  <th>Salario</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="employees-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section
+          id="panel-concepts"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-concepts"
+          data-step-panel="concepts"
+          hidden
+        >
+          <h2>2) Conceptos de pago (salarial/no salarial)</h2>
+          <form id="concept-form" class="grid-form">
+            <input type="hidden" id="concept-id" />
+            <label>
+              Código
+              <input id="concept-code" placeholder="COMISION" required />
+            </label>
+            <label>
+              Descripción
+              <input id="concept-description" required />
+            </label>
+            <label>
+              Monto
+              <input id="concept-amount" type="number" min="0" step="1" required />
+            </label>
+            <label>
+              Fecha de referencia
+              <input id="concept-effective-date" type="date" />
+            </label>
+            <label>
+              Es salarial
+              <input id="concept-is-salary" type="checkbox" checked />
+            </label>
+            <label>
+              Es habitual
+              <input id="concept-is-habitual" type="checkbox" checked />
+            </label>
+            <label>
+              Afecta base cesantías
+              <input id="concept-affects-severance" type="checkbox" checked />
+            </label>
+            <label>
+              Afecta base prima
+              <input id="concept-affects-bonus" type="checkbox" checked />
+            </label>
+            <label>
+              Afecta base vacaciones
+              <input id="concept-affects-vacation" type="checkbox" checked />
+            </label>
+            <label>
+              Afecta IBC
+              <input id="concept-affects-ibc" type="checkbox" checked />
+            </label>
+            <label class="span-2">
+              Fundamento de clasificación
+              <input id="concept-classification-basis" placeholder="Ej: Bonificación habitual retributiva" />
+            </label>
+            <label>
+              Usuario auditor
+              <input id="concept-changed-by" placeholder="analista.nomina" />
+            </label>
+            <div class="actions span-2">
+              <button type="submit">Guardar concepto</button>
+              <button type="button" id="concept-form-reset" class="secondary">Limpiar</button>
+            </div>
+          </form>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Descripción</th>
+                  <th>Monto</th>
+                  <th>Clasificación</th>
+                  <th>Trazabilidad</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="concepts-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section
+          id="panel-novelties"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-novelties"
+          data-step-panel="novelties"
+          hidden
+        >
+          <h2>3) Novedades de nómina</h2>
+          <form id="novelty-form" class="grid-form">
+            <input type="hidden" id="novelty-id" />
+            <label>
+              Código
+              <input id="novelty-code" placeholder="INCAP" required />
+            </label>
+            <label>
+              Descripción
+              <input id="novelty-description" required />
+            </label>
+            <label>
+              Monto
+              <input id="novelty-amount" type="number" min="0" step="1" required />
+            </label>
+            <label>
+              Fecha inicio
+              <input id="novelty-start-date" type="date" required />
+            </label>
+            <label>
+              Fecha fin
+              <input id="novelty-end-date" type="date" required />
+            </label>
+            <label>
+              Afecta IBC
+              <input id="novelty-affects-ibc" type="checkbox" checked />
+            </label>
+            <label>
+              Afecta promedios salariales
+              <input id="novelty-affects-average" type="checkbox" checked />
+            </label>
+            <div class="actions span-2">
+              <button type="submit">Guardar novedad</button>
+              <button type="button" id="novelty-form-reset" class="secondary">Limpiar</button>
+            </div>
+          </form>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Monto</th>
+                  <th>Rango</th>
+                  <th>Impacto</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="novelties-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section
+          id="panel-liquidation"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-liquidation"
+          data-step-panel="liquidation"
+          hidden
+        >
+          <h2>4) Ejecutar liquidación</h2>
+          <form id="liquidation-form" class="grid-form">
+            <label>
+              Fecha liquidación
+              <input id="liquidation-date" type="date" required />
+            </label>
+            <label>
+              Vigencia parámetros
+              <select id="annual-year"></select>
+            </label>
+            <label>
+              Calcular seguridad social
+              <input id="calculate-social-security" type="checkbox" checked />
+            </label>
+            <label>
+              Calcular retefuente
+              <input id="calculate-withholding" type="checkbox" />
+            </label>
+            <label>
+              Procedimiento retefuente
+              <select id="withholding-procedure">
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </label>
+            <label>
+              Modo litigio (moratoria)
+              <input id="litigation-mode" type="checkbox" />
+            </label>
+            <div class="actions span-2">
+              <button type="submit">Liquidar empleado seleccionado</button>
+            </div>
+          </form>
+
+          <div class="actions tight">
+            <button id="export-csv" class="secondary">Exportar CSV</button>
+            <button id="export-xlsx" class="secondary">Exportar Excel</button>
+            <button id="export-pdf" class="secondary">Exportar PDF</button>
+          </div>
+
+          <pre id="result-output" class="result-box">Sin resultados todavía.</pre>
+        </section>
+
+        <section
+          id="panel-history"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-history"
+          data-step-panel="history"
+          hidden
+        >
+          <h2>5) Historial y respaldo</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Empleado</th>
+                  <th>Neto</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="liquidations-table-body"></tbody>
+            </table>
+          </div>
+
+          <div class="actions">
+            <button id="backup-json" class="secondary">Exportar respaldo JSON</button>
+            <label class="file-input">
+              Importar respaldo JSON
+              <input type="file" id="import-json" accept="application/json" />
+            </label>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

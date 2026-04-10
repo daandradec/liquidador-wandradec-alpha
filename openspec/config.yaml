@@ -1,0 +1,100 @@
+schema: spec-driven
+
+context: |
+  Project: Liquidador laboral Colombia (v1).
+  Main objective: build a client-only SPA that liquidates prestaciones, vacaciones, indemnizaciones, seguridad social and optional retefuente for one or more employees.
+
+  Authoritative implementation scope for this repo:
+  - Frontend only (no backend in v1).
+  - Stack: HTML + CSS + JavaScript (ES modules) under ./code.
+  - Core engine must be pure and decoupled from UI/storage.
+  - Internal API: liquidateEmployee(request) => result.
+  - Persistence: localStorage + JSON backup/restore.
+  - Exports: CSV + Excel + PDF via CDN libraries.
+
+  Target structure:
+  - code/index.html
+  - code/css/styles.css
+  - code/js/app.js
+  - code/js/domain/
+  - code/js/config/annual-parameters.js
+  - code/js/engine/
+  - code/js/storage/repository.js
+  - code/js/export/
+  - code/js/ui/
+
+  Domain rules (Colombia labor liquidation):
+  - Distinguish salary vs non-salary concepts and keep audit trace for classification changes.
+  - Support includeAdditionalSalaryFactors globally and per concept flags.
+  - Use labor year of 360 days; vacations with factor 720.
+  - Cesantias = baseCesantias * (diasTrabajados / 360).
+  - Intereses cesantias = cesantias * 0.12 * (diasCausados / 360).
+  - Prima = basePrima * (diasTrabajadosPeriodo / 360) with semester cuts.
+  - Vacaciones = baseVacaciones * (diasTrabajados / 720).
+  - Indemnizacion:
+    * Fixed-term: remaining salaries until contract end.
+    * Project: remaining salaries of project, minimum 15 daily salaries.
+    * Indefinite:
+      - salary < 10 SMLMV: 30 days first year + 20 per additional year (proportional fraction).
+      - salary >= 10 SMLMV: 20 days first year + 15 per additional year (proportional fraction).
+  - Variable salary bases must use effectively earned values in the relevant period (not naive divide-by-12).
+  - Salary integral: do not liquidate cesantias/intereses/prima; keep vacaciones and social security active.
+  - integralSalaryIBCPercent is configurable (default 0.70).
+
+  Seguridad social:
+  - IBC = pagos salariales + exceso no salarial sobre 40% + novedades IBC.
+  - Non-salary excess:
+    total = salariales + noSalariales
+    limiteNoSalarial = total * 0.40
+    exceso = max(0, noSalariales - limiteNoSalarial)
+  - Apply legal caps: IBC min 1 SMLMV, max 25 SMLMV.
+  - Health: employee 4%, employer 8.5%.
+  - Pension: employee 4%, employer 12%.
+  - FSP from 4 SMLMV with progressive additions from 16+ SMLMV.
+  - ARL is employer-only using risk class rates:
+    {1: 0.00522, 2: 0.01044, 3: 0.02436, 4: 0.04350, 5: 0.06960}.
+
+  Retencion en la fuente:
+  - Optional module (calculateWithholdingTax + withholdingProcedure 1|2).
+  - Keep it decoupled from prestaciones engine.
+  - Do not treat cesantias/intereses as ordinary monthly withholding income.
+
+  Legal/parameterization requirements:
+  - Do not hardcode annual legal values; use annual parameters table by year.
+  - Include at least: SMLMV, transport allowance, UVT, shift schedule, surcharge percentages, health/pension rates, ARL rates, integral IBC percent.
+  - Reflect Ley 2466 de 2025 in configurable rules:
+    * day shift 06:00-19:00, night shift 19:00-06:00.
+    * sunday/holiday surcharge timeline: 80% (2025-07-01), 90% (2026-07-01), 100% (2027-07-01).
+
+  Data model baseline:
+  - Entities: Employee, PayConcept, PayrollNovelty, LiquidationRequest, LiquidationResult.
+  - Support contract types: INDEFINITE, FIXED_TERM, PROJECT, OCCASIONAL.
+  - Support salary modes: ORDINARY, INTEGRAL.
+  - Result must include bases, accruals, socialSecurity, tax, totals and trace.
+
+  Validation and audit expectations:
+  - Fixed-term requires end date and legal max checks.
+  - Project contract requires project description.
+  - Variable salary must preserve averaging period used.
+  - Integral salary requires threshold validation and blocked accruals.
+  - Warn when user tries to use PILA IBC as prestaciones salary base.
+  - Keep classification audit fields: concept, amount, selected class, rationale, user, timestamp.
+
+  Rounding and tests:
+  - Default rounding policy: roundCOP(value) = Math.round(value).
+  - Minimum unit tests:
+    1) fixed ordinary salary
+    2) variable salary
+    3) integral salary
+    4) IBC with non-salary excess
+    5) indefinite indemnization (<10 SMLMV and >=10 SMLMV)
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
