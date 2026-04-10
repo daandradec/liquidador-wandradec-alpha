@@ -1,4 +1,5 @@
-import { downloadBlob, flattenLiquidationRecord } from "./common.js"
+import { downloadBlob } from "./common.js"
+import { buildDetailedExportRows } from "./result-data.js"
 
 function toCsvCell(value) {
   if (value == null) return ""
@@ -10,7 +11,7 @@ function toCsvCell(value) {
 }
 
 export function exportLiquidationsToCSV(records, fileName = "liquidaciones.csv") {
-  const rows = records.map(flattenLiquidationRecord)
+  const rows = records.flatMap((record) => buildDetailedExportRows(record))
   if (!rows.length) {
     throw new Error("No hay liquidaciones para exportar a CSV.")
   }

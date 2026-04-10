@@ -5,6 +5,7 @@ import { liquidateEmployee } from "./engine/liquidate.js"
 import { exportLiquidationsToCSV } from "./export/csv.js"
 import { exportLiquidationsToPDF } from "./export/pdf.js"
 import { exportLiquidationsToXLSX } from "./export/excel.js"
+import { buildLiquidationSections, renderSectionsAsHtml } from "./export/result-data.js"
 import { exportStateAsJSON, importStateFromJSON, loadState, saveState } from "./storage/repository.js"
 import { formatContractType, formatCOP, formatSalaryMode } from "./ui/format.js"
 
@@ -460,99 +461,14 @@ function fillNoveltyForm(novelty) {
   document.querySelector("#novelty-affects-average").checked = !!novelty.affectsSalaryAverage
 }
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;")
-}
-
-function humanizeKey(key) {
-  return key
-    .replace(/([A-Z])/g, " $1")
-    .replaceAll("_", " ")
-    .replace(/^./, (character) => character.toUpperCase())
-}
-
-function formatResultValue(value) {
-  if (typeof value === "number") return value.toLocaleString("es-CO")
-  if (typeof value === "boolean") return value ? "Sí" : "No"
-  if (Array.isArray(value)) return value.join(", ")
-  if (value == null || value === "") return "-"
-  return String(value)
-}
-
-function flattenObjectEntries(data, parentKey = "") {
-  const entries = []
-
-  Object.entries(data || {}).forEach(([key, value]) => {
-    const currentKey = parentKey ? `${parentKey} / ${key}` : key
-    const isPlainObject = value && typeof value === "object" && !Array.isArray(value)
-
-    if (isPlainObject) {
-      entries.push(...flattenObjectEntries(value, currentKey))
-      return
-    }
-
-    entries.push([currentKey, value])
-  })
-
-  return entries
-}
-
-function buildResultTableRows(data) {
-  return flattenObjectEntries(data)
-    .map(([key, value]) => {
-      return `<tr><th>${escapeHtml(humanizeKey(key))}</th><td>${escapeHtml(formatResultValue(value))}</td></tr>`
-    })
-    .join("")
-}
-
-function buildResultSection(title, data) {
-  return `
-    <section class="result-section">
-      <h3 class="result-section-title">${escapeHtml(title)}</h3>
-      <table class="result-table">
-        <tbody>
-          ${buildResultTableRows(data)}
-        </tbody>
-      </table>
-    </section>
-  `
-}
-
-function buildTextListSection(title, items) {
-  if (!items?.length) return ""
-
-  const listItems = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
-  return `
-    <section class="result-section">
-      <h3 class="result-section-title">${escapeHtml(title)}</h3>
-      <ul class="result-list">${listItems}</ul>
-    </section>
-  `
-}
-
-function renderResultAsTable(result) {
-  const sections = [
-    buildResultSection("Bases", result.bases || {}),
-    buildResultSection("Prestaciones e indemnizaciones", result.accruals || {}),
-    buildResultSection("Seguridad social", result.socialSecurity || {}),
-    buildResultSection("Retefuente", result.tax || {}),
-    buildResultSection("Totales", result.totals || {}),
-    buildResultSection("Meta", result.meta || {}),
-    buildTextListSection("Trazabilidad", result.trace || []),
-    buildTextListSection("Advertencias", result.warnings || []),
-  ]
-
-  refs.resultOutput.innerHTML = sections.filter(Boolean).join("")
+function renderResultAsTable(record) {
+  const sections = buildLiquidationSections(record)
+  refs.resultOutput.innerHTML = renderSectionsAsHtml(sections)
 }
 
 function renderResult(record) {
   currentResultRecord = record
-  renderResultAsTable(record.result)
+  renderResultAsTable(record)
 }
 
 function runLiquidation() {
@@ -635,7 +551,7 @@ function getRecordById(recordId) {
   return state.liquidations.find((record) => record.id === recordId)
 }
 
-function exportCurrentRecord(type) {
+async function exportCurrentRecord(type) {
   if (!currentResultRecord) {
     showToast("No hay resultado seleccionado para exportar.", true)
     return
@@ -650,7 +566,11 @@ function exportCurrentRecord(type) {
       exportLiquidationsToXLSX(list, `liquidacion_${currentResultRecord.employeeId}_${currentResultRecord.liquidationDate}.xlsx`)
     }
     if (type === "pdf") {
-      exportLiquidationsToPDF(list, `liquidacion_${currentResultRecord.employeeId}_${currentResultRecord.liquidationDate}.pdf`)
+      await exportLiquidationsToPDF(
+        list,
+        `liquidacion_${currentResultRecord.employeeId}_${currentResultRecord.liquidationDate}.pdf`,
+        refs.resultOutput
+      )
     }
     showToast("Exportación completada.")
   } catch (error) {
@@ -900,9 +820,15 @@ function attachEvents() {
     }
   })
 
-  refs.exportCsv.addEventListener("click", () => exportCurrentRecord("csv"))
-  refs.exportXlsx.addEventListener("click", () => exportCurrentRecord("xlsx"))
-  refs.exportPdf.addEventListener("click", () => exportCurrentRecord("pdf"))
+  refs.exportCsv.addEventListener("click", () => {
+    void exportCurrentRecord("csv")
+  })
+  refs.exportXlsx.addEventListener("click", () => {
+    void exportCurrentRecord("xlsx")
+  })
+  refs.exportPdf.addEventListener("click", () => {
+    void exportCurrentRecord("pdf")
+  })
 
   refs.backupJson.addEventListener("click", () => downloadJsonBackup())
   refs.importJson.addEventListener("change", (event) => {
