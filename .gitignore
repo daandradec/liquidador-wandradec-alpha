@@ -1,0 +1,73 @@
+# Accept everything by default
+!*
+
+# Ignore common multimedia file extensions
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.tif
+*.webp
+*.heif
+*.heic
+*.svg   # (optional – SVG is vector, but often treated as image)
+
+# Audio
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.m4a
+*.wma
+*.aiff
+*.ape
+
+# Video
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.wmv
+*.flv
+*.webm
+*.mpeg
+*.mpg
+*.3gp
+*.3g2
+*.m4v
+
+# Other media / binary formats (optional)
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.bz2
+*.iso
+
+.gemini/brain
+capturas/
+clones/
+migrations/
+offline/
+prompts/
+specs/
+openspec/
+.codex
+.claude
+
+./**/node_modules/**
+./**/package-lock.json
+
+# End of .gitignore

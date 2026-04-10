@@ -1,0 +1,33 @@
+# Dependencias y compilados (Alta densidad de tokens inútiles)
+node_modules/
+dist/
+build/
+out/
+.next/
+.git/
+prompts/
+offline/
+clones/
+capturas/
+migrations/
+.*/**
+
+# Lockfiles y logs
+*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+*.log
+
+# Entornos y SO
+venv/
+.env
+.DS_Store
+
+# Documentación y configuración (Excluidos para maximizar la ventana de contexto)
+*.md
+*.mdx
+*.yaml
+*.yml
+*.toml
+.*
