@@ -1,3 +1,4 @@
+<php>
 <!doctype html>
 <html lang="es">
   <head>
@@ -509,3 +510,4 @@
     <script type="module" src="./js/app.js"></script>
   </body>
 </html>
+</php>
